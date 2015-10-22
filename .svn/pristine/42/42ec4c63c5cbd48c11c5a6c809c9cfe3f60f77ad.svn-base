@@ -1,0 +1,54 @@
+package com.example.pocketchef;
+
+
+import java.text.DecimalFormat;
+
+/**
+* Represents a Barcode.
+*/
+@SuppressWarnings({ "rawtypes" })
+public class Barcode implements Comparable {
+	private String _code;
+
+	/**
+	* Constructs a new Barcode object.
+	* @param s The value of the Barcode
+	*/
+	public Barcode(String s) {
+		setCode(s);
+	}
+
+	/**
+	* Gets the Barcode's code.
+	* @return The Barcode's number.
+	*/
+	public String getCode() {
+		return _code;
+	}
+
+	/**
+	* Sets the Barcode's code.
+	* @param code The new value for the Barcode.
+	*/
+	public void setCode(String code) {
+		_code = code;
+	}
+	
+	public int hashCode(){
+		return (_code == null) ? 0 : _code.hashCode();
+	}
+	
+	public boolean equals(Object o){
+		if(o instanceof Barcode) return hashCode() == o.hashCode();
+		else return false;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		return _code.compareTo(((Barcode)o).getCode());
+	}
+
+	public String toString() {
+		return _code;
+	}
+}

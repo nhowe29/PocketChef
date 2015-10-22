@@ -1,0 +1,144 @@
+package com.example.pocketchef;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.concurrent.ExecutionException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import com.dm.zbar.android.scanner.ZBarConstants;
+import com.dm.zbar.android.scanner.ZBarScannerActivity;
+
+
+public class ScannerUPC extends Activity {
+	
+	Barcode b = null;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+			setContentView(R.layout.activity_scanner);
+		
+			Intent intent = new Intent(this, ZBarScannerActivity.class);
+			startActivityForResult(intent, PocketChefConstants.ZBAR_SCANNER_REQUEST);
+			finish();
+	}
+	
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		// Test scan code
+		if (resultCode == RESULT_OK) 
+	    {
+	        // Scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT)
+	        // Type of the scan result is available by making a call to data.getStringExtra(ZBarConstants.SCAN_RESULT_TYPE)
+			String scanContent = data.getStringExtra(ZBarConstants.SCAN_RESULT);
+			int scanFormat = data.getIntExtra(ZBarConstants.SCAN_RESULT_TYPE, 0);
+			
+			// Do something with result here.
+			searchUPCdatabase(scanContent);
+			
+		//	finish(); // returns back to the main menu
+			
+	    } else if(resultCode == RESULT_CANCELED) {
+	        Toast.makeText(this, "Camera unavailable. This error is expected on an emulator.", Toast.LENGTH_SHORT).show();
+	      //  finish();
+	    }
+	}
+	
+	public void searchUPCdatabase(String upc) {
+		
+		b = new Barcode(upc);
+		String result = "";
+		
+		String barcodes[] = { "upc" };
+		Decode d = new Decode();
+		try {
+			result = d.execute(barcodes).get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		b.setName(result);
+		System.out.println("We got and used the result! : " + result);
+		
+		Intent dataIntent = new Intent();
+        dataIntent.putExtra(PocketChefConstants.DECODE_RESULT, result);
+      //  dataIntent.putExtra(PocketChefConstants.DECODE_RESULT, sym.getType());
+        setResult(Activity.RESULT_OK, dataIntent);
+	}
+	
+	private class Decode extends AsyncTask<String, Integer, String> {
+		
+		@Override
+		protected String doInBackground(String... strings) {
+	         
+	         String result = "";
+	    	 
+	         try {
+	         	String jsonResult = "";
+	         	
+	         	// Incorrect URL? Or the website is down right now..
+	         	URL api = new URL("http://www.upcdatabase.org/api/json/033e3f98" +
+	         			"478c2eb2d64aa3f79a5d3e93/" + b.getCode());
+	         	
+	         	
+	         	System.out.println("URL: " + api);
+	 	        URLConnection con = api.openConnection();
+
+	 	        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+	 	        String inputLine;
+	 	        while ((inputLine = in.readLine()) != null) {
+	 	        	jsonResult += inputLine;
+	 	             System.out.println(inputLine);
+	 	        }
+	 	        in.close();
+
+	 	        JSONObject json = new JSONObject(jsonResult); // convert jsonResult to JSONObject
+	 	        
+	 	        if (!json.isNull("itemname") && json.getString("itemname") != null) {
+	 	        	result = json.getString("itemname");
+	 	        }
+	 	        if (result == null || result.equals("")) {
+	 	        	
+	 	        	if  (!json.isNull("description") && json.getString("description") != null)
+	 	        		result = json.getString("description");
+	 	        	
+	 	        	if (result == null || result.equals(""))
+	 	        	return "-1"; // or throw
+	 	        }
+	         }
+	         catch (IOException e) {
+	         	System.out.println("Error reading json: " + e);
+	         }
+	         catch (JSONException e) {
+	         	System.out.println("Error parsing json: " + e);
+	         }
+
+	 		 System.out.println("RESULT:\n" + result); // Print out the item!
+	 		 
+	 		 
+	 		 return result;
+	    }
+
+		@Override
+		protected void onPostExecute(String result) {
+		    super.onPostExecute(result);
+		}
+	}
+}

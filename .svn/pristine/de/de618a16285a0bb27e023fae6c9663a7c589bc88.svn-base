@@ -1,0 +1,6 @@
+package com.example.pocketchef;
+
+public interface PocketChefConstants {
+	    public static final String TEST_CONSTANT = "<<< USE THIS FORMAT";
+	    public static final String RPC_KEY = "f8f617068ba680bf6708b33a1612155d00b31012";
+}

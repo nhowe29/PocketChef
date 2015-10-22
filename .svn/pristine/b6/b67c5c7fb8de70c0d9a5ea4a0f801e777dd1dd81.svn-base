@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+     <TableRow>
+            <TextView
+                style="@style/TextViewStandard"
+                android:layout_weight="0dp"
+                android:text="Name:" />
+
+            <EditText
+                style="@style/EditTextStandard"
+                android:id="@+id/et_name"
+                android:layout_weight="0dp" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                style="@style/TextViewStandard"
+                android:layout_weight="1"
+                android:text="URL:" />
+
+            <EditText
+                style="@style/EditTextStandard"
+                android:id="@+id/et_url"
+                android:layout_weight="0dp" />
+        </TableRow>
+
+        <TableRow>
+            <Button
+                style="@style/ButtonStandard"
+                android:layout_column="0"
+                android:layout_marginTop="6dip"
+                android:onClick="onClickOk"
+                android:text="@android:string/ok" />
+        </TableRow>
+    
+
+</TableLayout>
